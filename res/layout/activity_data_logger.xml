@@ -11,7 +11,7 @@
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
         android:textSize="20sp"
-        android:text="Date: " />
+        android:text="@string/date_text" />
     
     <TextView
         android:id="@+id/timeTextView"
@@ -20,7 +20,7 @@
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
         android:textSize="20sp"
-        android:text="Time: " />
+        android:text="@string/time_text" />
     
     <TextView
         android:id="@+id/voltTextView"
@@ -29,7 +29,7 @@
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
         android:textSize="20sp"
-        android:text="Volts: " />
+        android:text="@string/volt_text" />
     
     <LinearLayout
         android:layout_width="match_parent"
@@ -39,7 +39,7 @@
         <TextView 
             android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
-        	android:text="Log Interval: "
+        	android:text="@string/log_interval_label"
         	android:textSize="20sp" />
         
         <EditText 
@@ -47,7 +47,7 @@
             android:layout_width="match_parent"
         	android:layout_height="wrap_content"
         	android:inputType="number"
-        	android:hint="seconds" />
+        	android:hint="@string/log_interval_hint" />
         
     </LinearLayout>
     
@@ -57,13 +57,6 @@
         android:layout_height="wrap_content"
         android:paddingTop="20dp"
         android:paddingBottom="20dp"
-        android:text="Start Data Log" />
-    
-	<ToggleButton android:text="ToggleButton" 
-	    		  android:layout_width="wrap_content" 
-	    		  android:layout_height="wrap_content" 
-	    		  android:id="@+id/button"
-	    		  android:paddingTop="20dp"
-        		  android:paddingBottom="20dp" />
+        android:text="@string/start_data_log_text" />
 	
 </LinearLayout>

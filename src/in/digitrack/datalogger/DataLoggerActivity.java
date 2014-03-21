@@ -1,19 +1,14 @@
 package in.digitrack.datalogger;
 
 import ioio.lib.api.AnalogInput;
-import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.Calendar;
 import java.util.Date;
 
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,25 +16,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 public class DataLoggerActivity extends IOIOActivity {
 
-	private ToggleButton button_;
 	private TextView dateTextView;
 	private TextView timeTextView;
 	private TextView voltTextView;
 	private EditText intervalEditText;
 	private Button dataLogButton;
+	
 	private boolean isLoggingInProgress;
 	private String currentData;
-	private int lastLogTime;
+	DataLog dataLog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_data_logger);
-		button_ = (ToggleButton) findViewById(R.id.button);
 		dateTextView = (TextView) findViewById(R.id.dateTextView);
 		timeTextView = (TextView) findViewById(R.id.timeTextView);
 		voltTextView = (TextView) findViewById(R.id.voltTextView);
@@ -48,46 +41,45 @@ public class DataLoggerActivity extends IOIOActivity {
 		
 		isLoggingInProgress = false;
 		
+		dataLog = new DataLog("data/data_log.txt", getApplicationContext());
+		
 		dataLogButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
 				if(isLoggingInProgress) {					
 					isLoggingInProgress = false;
-					dataLogButton.setText("Start Data Log");
+					dataLogButton.setText(getString(R.string.start_data_log_text));
 				} else {
 					isLoggingInProgress = true;
-					dataLogButton.setText("Stop Data Log");
+					dataLogButton.setText(getString(R.string.stop_data_log_text));
 				}
 			}
 		});
 	}
 
 	class Looper extends BaseIOIOLooper {
-		/** The on-board LED. */
-		private DigitalOutput led_;
 		private AnalogInput voltInput;
 
 		@Override
 		protected void setup() throws ConnectionLostException {
-			led_ = ioio_.openDigitalOutput(0, true);
 			voltInput = ioio_.openAnalogInput(39);
 		}
 
 		@Override
 		public void loop() throws ConnectionLostException, InterruptedException {
-			led_.write(!button_.isChecked());
-			
 			float volts = voltInput.getVoltage();
 			setText(volts);
 			if(isLoggingInProgress) {
-				Calendar c = Calendar.getInstance(); 
-				int seconds = c.get(Calendar.SECOND);
-				int hours = c.get(Calendar.HOUR_OF_DAY);
-				int minutes = c.get(Calendar.MINUTE);
-				int curTimeInSec = (hours * 3600) + (minutes * 60) + seconds;
-				if(seconds % 20 == 0 && lastLogTime != curTimeInSec) {
-					appendToFile("data/data_log.txt", currentData);
-					lastLogTime = curTimeInSec;
+				long curTimeInSec = System.currentTimeMillis() / 1000;
+				int intervalSec = 20;
+				try {
+					intervalSec = Integer.parseInt(intervalEditText.getText().toString());
+				} catch(NumberFormatException nfe) {
+					Toast.makeText(getApplicationContext(), nfe.getMessage(), Toast.LENGTH_SHORT).show();
+				} 
+				if(curTimeInSec % intervalSec == 0 && dataLog.getLastLogTime() != curTimeInSec) {
+					dataLog.appendData(currentData);
+					dataLog.setLastLogTime(curTimeInSec);
 				}
 			}
 			Thread.sleep(100);
@@ -114,16 +106,4 @@ public class DataLoggerActivity extends IOIOActivity {
 			}
 		});
 	}
-	
-	private void appendToFile(String filename, String line) {
-		 File root = Environment.getExternalStorageDirectory();
-		 try {
-			 FileOutputStream f = new FileOutputStream(new File(root, filename), true);
-			 f.write(line.getBytes());
-			 f.close();
-		 } catch (Exception e) {
-			 Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-		 }
-	}
-
 }
