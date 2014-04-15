@@ -41,7 +41,7 @@ public class DataLoggerActivity extends IOIOActivity {
 		
 		isLoggingInProgress = false;
 		
-		dataLog = new DataLog("data/data_log.txt", getApplicationContext());
+		dataLog = new DataLog("data_log.txt", getApplicationContext());
 		
 		dataLogButton.setOnClickListener(new OnClickListener() {
 			@Override
